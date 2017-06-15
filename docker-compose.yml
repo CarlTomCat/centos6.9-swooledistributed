@@ -1,0 +1,70 @@
+version: "2.1"
+
+services:
+  lnmp:
+    build:
+      context: ./docker/lnmp
+      args:
+        - local_host_ip=${LOCAL_HOST_IP}
+    environment:
+      - LOCAL_HOST_IP=${LOCAL_HOST_IP}
+      - MYSQL_ROOT_PASSWORD=123456
+    extra_hosts:
+      - "${WEBSITE_DOMAIN}:${LOCAL_HOST_IP}"
+    ports:
+      - "80:80"
+      - "220:22"
+    volumes:
+      - ${ROOT_PATH}/mysql/data:/var/lib/mysql
+      - ${CODE_PATH}:/data/wwwroot
+    tty: true
+#  nginx:
+#    build:
+#      context: ./docker/nginx
+#      args:
+#        - local_host_ip=${LOCAL_HOST_IP}
+#    environment:
+#      - LOCAL_HOST_IP=${LOCAL_HOST_IP}
+#    extra_hosts:
+#      - "${WEBSITE_DOMAIN}:${LOCAL_HOST_IP}"
+#    ports:
+#      - "80:80"
+#    links:
+#      - "php"
+#    volumes:
+#      - ${ROOT_PATH}:/data/wwwroot
+#
+#  php:
+#    build:
+#      context: ./docker/php
+#      args:
+#        - local_host_ip=${LOCAL_HOST_IP}
+#    environment:
+#      - LOCAL_HOST_IP=${LOCAL_HOST_IP}
+#    extra_hosts:
+#      - "${WEBSITE_DOMAIN}:${LOCAL_HOST_IP}"
+#    ports:
+#      - "9080:9080"
+#    links:
+#      - "mysql"
+#      - "redis"
+#    volumes:
+#      - ${CODE_PATH}:/data/wwwroot
+#
+#  mysql:
+#    build: ./docker/mysql
+#    environment:
+#      - MYSQL_USER=root
+#      - MYSQL_ROOT_PASSWORD=123456
+#    ports:
+#      - "3306:3306"
+#    volumes:
+#      - ${ROOT_PATH}/mysql/data:/var/lib/mysql
+#
+#  redis:
+#    build: ./docker/redis
+#    ports:
+#      - "6379:6379"
+
+
+
