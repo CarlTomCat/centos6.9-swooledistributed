@@ -26,14 +26,12 @@ RUN cd /usr/local/src && rpm -ivh epel-release-latest-6.noarch.rpm
 # 下载lnmp安装包并安装, PHP>7.0; mysql>5.6
 RUN cd /usr/local/src && tar zxf lnmp1.4.tar.gz && cd lnmp1.4 && ./install_lnmp.sh
 
+# 配置 nginx
+COPY www.dev.com.conf /usr/local/nginx/conf/vhost/www.dev.com.conf
+RUN sed -i "s/include vhost\/\*\.conf;/\# log format\nlog_format access '\$remote_addr - \$remote_user \[\$time_local\] "\$request" '\n    '\$status \$body_bytes_sent "\$http_referer" '\n    '"\$http_user_agent" \$http_x_forwarded_for';\ninclude vhost\/\*\.conf;/" /usr/local/nginx/conf/nginx.conf
+
 # 安装 redis
 RUN yum install -y redis
-
-# 安装 inotify 扩展
-RUN cd /usr/local/src && tar -zxvf inotify-2.0.0.tgz && cd inotify-2.0.0 && phpize \
-    && ./configure --with-php-config=/usr/local/php/bin/php-config \
-    && make \
-    && make install
 
 # 安装 redis 扩展
 RUN cd /usr/local/src && unzip phpredis-php7.zip && cd phpredis-php7 && phpize \
@@ -41,15 +39,20 @@ RUN cd /usr/local/src && unzip phpredis-php7.zip && cd phpredis-php7 && phpize \
     && make \
     && make install
 
-# 安装 composer
-RUN cd /usr/local/src && curl -sS https://getcomposer.org/installer | php \
-    && composer config -g repo.packagist composer https://packagist.phpcomposer.com
-
 # 安装 hiredis
 RUN cd /usr/local/src && tar -zxvf hiredis-0.13.3.tar.gz && cd hiredis-0.13.3 \
     && make -j \
     && sudo make install \
     && sudo ldconfig
+
+# 配置 redis
+RUN sed -i "s/^# requirepass.*$/requirepass 123456/" /etc/redis.conf
+
+# 安装 inotify 扩展
+RUN cd /usr/local/src && tar -zxvf inotify-2.0.0.tgz && cd inotify-2.0.0 && phpize \
+    && ./configure --with-php-config=/usr/local/php/bin/php-config \
+    && make \
+    && make install
 
 # 安装 jemalloc
 RUN cd /usr/local/src && tar -zxvf jemalloc-4.5.0.tar.gz && cd jemalloc-4.5.0 \
@@ -63,6 +66,21 @@ RUN cd /usr/local/src && tar -zxvf swoole-src-1.9.13.tar.gz && cd swoole-src-1.9
     && make \
     && make install
 
+# 配置 php.ini
+RUN echo "\n\nextension=redis.so\nextension=inotify.so\nextension=swoole.so" >> /usr/local/php/etc/php.ini \
+    && sed -i "s/;error_log = php_errors\.log/error_log = \/data\/phplogs\/error.log/" /usr/local/php/etc/php.ini \
+    && sed -i "s///" /usr/local/php/etc/php.ini
+
+# 安装 ssh 服务
+RUN yum install -y openssh-server passwd \
+    && echo 'root'|passwd root --stdin \
+    && ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key \
+    && ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+
+# 安装 composer
+RUN cd /usr/local/src && curl -sS https://getcomposer.org/installer | php \
+    && composer config -g repo.packagist composer https://packagist.phpcomposer.com
+
 # 安装 SwooleDistributed 扩展
 RUN cd /usr/local/src && git clone https://github.com/tmtbe/SwooleDistributed.git \
     && cd SwooleDistributed \
@@ -71,5 +89,7 @@ RUN cd /usr/local/src && git clone https://github.com/tmtbe/SwooleDistributed.gi
 # 启动 web 环境
 CMD /etc/init.d/php-fpm start \
     && /etc/init.d/nginx start \
+    && /etc/init.d/redis start \
+    && /usr/sbin/sshd \
     && /bin/bash
 

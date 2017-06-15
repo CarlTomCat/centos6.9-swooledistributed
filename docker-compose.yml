@@ -14,53 +14,25 @@ services:
     ports:
       - "80:80"
       - "220:22"
+      - "6379:6379"
+    links:
+      - "mysql"
     volumes:
-      - ${ROOT_PATH}/mysql/data:/var/lib/mysql
+      - ${ROOT_PATH}/log/nginx:/data/nginxlogs
+      - ${ROOT_PATH}/log/php:/data/phplogs
       - ${CODE_PATH}:/data/wwwroot
     tty: true
-#  nginx:
-#    build:
-#      context: ./docker/nginx
-#      args:
-#        - local_host_ip=${LOCAL_HOST_IP}
-#    environment:
-#      - LOCAL_HOST_IP=${LOCAL_HOST_IP}
-#    extra_hosts:
-#      - "${WEBSITE_DOMAIN}:${LOCAL_HOST_IP}"
-#    ports:
-#      - "80:80"
-#    links:
-#      - "php"
-#    volumes:
-#      - ${ROOT_PATH}:/data/wwwroot
-#
-#  php:
-#    build:
-#      context: ./docker/php
-#      args:
-#        - local_host_ip=${LOCAL_HOST_IP}
-#    environment:
-#      - LOCAL_HOST_IP=${LOCAL_HOST_IP}
-#    extra_hosts:
-#      - "${WEBSITE_DOMAIN}:${LOCAL_HOST_IP}"
-#    ports:
-#      - "9080:9080"
-#    links:
-#      - "mysql"
-#      - "redis"
-#    volumes:
-#      - ${CODE_PATH}:/data/wwwroot
-#
-#  mysql:
-#    build: ./docker/mysql
-#    environment:
-#      - MYSQL_USER=root
-#      - MYSQL_ROOT_PASSWORD=123456
-#    ports:
-#      - "3306:3306"
-#    volumes:
-#      - ${ROOT_PATH}/mysql/data:/var/lib/mysql
-#
+
+  mysql:
+    build: ./docker/mysql
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_ROOT_PASSWORD=123456
+    ports:
+      - "3306:3306"
+    volumes:
+      - ${ROOT_PATH}/mysql/data:/var/lib/mysql
+
 #  redis:
 #    build: ./docker/redis
 #    ports:
