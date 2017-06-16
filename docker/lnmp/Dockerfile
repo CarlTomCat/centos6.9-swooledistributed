@@ -93,9 +93,7 @@ RUN cd /usr/local/src && curl -sS https://getcomposer.org/installer | php \
     && composer config -g repo.packagist composer https://packagist.phpcomposer.com
 
 # 安装 SwooleDistributed 扩展
-RUN cd /usr/local/src && git clone https://github.com/tmtbe/SwooleDistributed.git \
-    && cd SwooleDistributed \
-    && composer install
+RUN cd /data/wwwroot && composer install
 
 # 启动 web 环境
 CMD /etc/init.d/php-fpm start \
