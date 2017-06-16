@@ -6,6 +6,7 @@ services:
       context: ./docker/lnmp
       args:
         - local_host_ip=${LOCAL_HOST_IP}
+        - website_domain=${WEBSITE_DOMAIN}
     environment:
       - LOCAL_HOST_IP=${LOCAL_HOST_IP}
       - MYSQL_ROOT_PASSWORD=123456

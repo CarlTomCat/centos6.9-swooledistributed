@@ -1,5 +1,11 @@
 FROM centos:6.9
 
+# 参数
+ARG website_domain
+
+# 修改 host
+RUN echo "127.0.0.1 ${website_domain}" >> /etc/hosts
+
 # 安装 wget, sudo, autoconf, gcc, make
 RUN yum install -y wget \
     sudo \
@@ -19,9 +25,13 @@ COPY hiredis-0.13.3.tar.gz /usr/local/src/hiredis-0.13.3.tar.gz
 COPY inotify-2.0.0.tgz /usr/local/src/inotify-2.0.0.tgz
 COPY jemalloc-4.5.0.tar.gz /usr/local/src/jemalloc-4.5.0.tar.gz
 COPY swoole-src-1.9.13.tar.gz /usr/local/src/swoole-src-1.9.13.tar.gz
+COPY re2c-0.16.tar.gz /usr/local/src/re2c-0.16.tar.gz
 
 # 为 centos7 增加yum的epel源（redis）
 RUN cd /usr/local/src && rpm -ivh epel-release-latest-6.noarch.rpm
+
+# 安装 re2c
+RUN cd /usr/local/src && tar zxf re2c-0.16.tar.gz && cd re2c-0.16 && ./configure && make && make install
 
 # 下载lnmp安装包并安装, PHP>7.0; mysql>5.6
 RUN cd /usr/local/src && tar zxf lnmp1.4.tar.gz && cd lnmp1.4 && ./install_lnmp.sh
@@ -67,9 +77,10 @@ RUN cd /usr/local/src && tar -zxvf swoole-src-1.9.13.tar.gz && cd swoole-src-1.9
     && make install
 
 # 配置 php.ini
-RUN echo "\n\nextension=redis.so\nextension=inotify.so\nextension=swoole.so" >> /usr/local/php/etc/php.ini \
-    && sed -i "s/;error_log = php_errors\.log/error_log = \/data\/phplogs\/error.log/" /usr/local/php/etc/php.ini \
-    && sed -i "s///" /usr/local/php/etc/php.ini
+RUN echo "extension=redis.so" >> /usr/local/php/etc/php.ini \
+    && echo "extension=inotify.so" >> /usr/local/php/etc/php.ini \
+    && echo "extension=swoole.so" >> /usr/local/php/etc/php.ini \
+    && sed -i "s/;error_log = php_errors\.log/error_log = \/data\/phplogs\/error.log/" /usr/local/php/etc/php.ini
 
 # 安装 ssh 服务
 RUN yum install -y openssh-server passwd \
