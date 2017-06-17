@@ -15,7 +15,8 @@ RUN yum install -y wget \
     libxslt \
     opensp \
     docbook-style-xsl \
-    initscripts
+    initscripts \
+    re2c
 
 # package
 COPY lnmp1.4.tar.gz /usr/local/src/lnmp1.4.tar.gz
@@ -29,9 +30,6 @@ COPY re2c-0.16.tar.gz /usr/local/src/re2c-0.16.tar.gz
 
 # 为 centos7 增加yum的epel源（redis）
 RUN cd /usr/local/src && rpm -ivh epel-release-latest-6.noarch.rpm
-
-# 安装 re2c
-RUN cd /usr/local/src && tar zxf re2c-0.16.tar.gz && cd re2c-0.16 && ./configure && make && make install
 
 # 下载lnmp安装包并安装, PHP>7.0; mysql>5.6
 RUN cd /usr/local/src && tar zxf lnmp1.4.tar.gz && cd lnmp1.4 && ./install_lnmp.sh
@@ -92,13 +90,13 @@ RUN yum install -y openssh-server passwd \
 RUN cd /usr/local/src && curl -sS https://getcomposer.org/installer | php \
     && composer config -g repo.packagist composer https://packagist.phpcomposer.com
 
-# 安装 SwooleDistributed 扩展
-RUN cd /data/wwwroot && composer install
-
 # 启动 web 环境
 CMD /etc/init.d/php-fpm start \
     && /etc/init.d/nginx start \
     && /etc/init.d/redis start \
     && /usr/sbin/sshd \
-    && /bin/bash
+    && cd /data/wwwroot \
+    && composer install \
+    && cd /data/wwwroot/bin \
+    && php start_swoole_server.php start
 
