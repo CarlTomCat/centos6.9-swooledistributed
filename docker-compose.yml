@@ -7,16 +7,18 @@ services:
       args:
         - local_host_ip=${LOCAL_HOST_IP}
         - website_domain=${WEBSITE_DOMAIN}
+        - nginx_port=${NGINX_PORT}
     environment:
       - LOCAL_HOST_IP=${LOCAL_HOST_IP}
       - MYSQL_ROOT_PASSWORD=123456
     extra_hosts:
       - "${WEBSITE_DOMAIN}:${LOCAL_HOST_IP}"
     ports:
-      - "80:80"
+      - "${NGINX_PORT}:${NGINX_PORT}"
+      - "${SWOOLE_HTTP_PORT}:${SWOOLE_HTTP_PORT}"
+      - "${SWOOLE_TCP_PORT}:${SWOOLE_TCP_PORT}"
       - "220:22"
       - "6379:6379"
-      - "8081:8081"
     links:
       - "mysql"
     volumes:

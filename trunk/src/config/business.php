@@ -45,7 +45,7 @@ $config['http']['root'] = [
             'root' => 'www',
             'index' => 'Index.html'
         ],
-    'www.sder.xin' =>
+    'www.dev.com' =>
         [
             'root' => 'www',
             'index' => 'Index.html'

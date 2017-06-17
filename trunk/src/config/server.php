@@ -10,7 +10,7 @@
  */
 $config['http_server']['enable'] = true;
 $config['http_server']['socket'] = '0.0.0.0';
-$config['http_server']['port'] = 8081;
+$config['http_server']['port'] = 80;
 /**
  * 是否启用websocket
  */
@@ -24,7 +24,7 @@ $config['websocket']['opcode'] = WEBSOCKET_OPCODE_BINARY;
  */
 $config['tcp']['enable'] = true;
 $config['tcp']['socket'] = '0.0.0.0';
-$config['tcp']['port'] = 9093;
+$config['tcp']['port'] = 9090;
 
 /**
  * 服务器设置

@@ -11,6 +11,9 @@ then
     exit 1;
 fi
 
+export NGINX_PORT="8080"
+export SWOOLE_HTTP_PORT="80"
+export SWOOLE_TCP_PORT="9090"
 export WEBSITE_DOMAIN="www.dev.com";
 export ROOT_PATH=$1;
 echo "工作目录：${ROOT_PATH}"
