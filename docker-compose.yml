@@ -20,11 +20,11 @@ services:
       - "220:22"
       - "6379:6379"
     links:
-      - "mysql"
+      - mysql:mysqlhost
     volumes:
       - ${ROOT_PATH}/log/nginx:/data/nginxlogs
       - ${ROOT_PATH}/log/php:/data/phplogs
-      - ${CODE_PATH}:/data/wwwroot
+      - ${ROOT_PATH}:/data/wwwroot
     tty: true
 
   mysql:

@@ -36,11 +36,11 @@ RUN cd /usr/local/src && rpm -ivh epel-release-latest-6.noarch.rpm
 RUN cd /usr/local/src && tar zxf lnmp1.4.tar.gz && cd lnmp1.4 && ./install_lnmp.sh
 
 # 配置 nginx
-COPY localhost.conf /usr/local/nginx/conf/vhost/localhost.conf
+COPY pma.conf /usr/local/nginx/conf/vhost/pma.conf
 RUN sed -i "s/include vhost\/\*\.conf;/\# log format\nlog_format access '\$remote_addr - \$remote_user \[\$time_local\] "\$request" '\n    '\$status \$body_bytes_sent "\$http_referer" '\n    '"\$http_user_agent" \$http_x_forwarded_for';\ninclude vhost\/\*\.conf;/" /usr/local/nginx/conf/nginx.conf \
     && sed -i "s/listen 80 default_server;/listen ${nginx_port} default_server;/" /usr/local/nginx/conf/nginx.conf \
-    && sed -i "s/listen 80;/listen ${nginx_port};/" /usr/local/nginx/conf/vhost/localhost.conf \
-    && sed -i "s/www\.dev\.com/${website_domain}/" /usr/local/nginx/conf/vhost/localhost.conf
+    && sed -i "s/listen 80;/listen ${nginx_port};/" /usr/local/nginx/conf/vhost/pma.conf \
+    && sed -i "s/pma\.com/${website_domain}/" /usr/local/nginx/conf/vhost/pma.conf
 
 # 安装 redis
 RUN yum install -y redis

@@ -26,7 +26,7 @@ echo
 
 # 项目配置初始化
 echo "项目代码配置初始化..."
-export CODE_PATH="${ROOT_PATH}/trunk";
+export PMA_PATH="${ROOT_PATH}/pma";
 
 # true, false 定义
 TRUE=1

@@ -6,7 +6,7 @@
  * Time: 下午4:49
  */
 $config['mysql']['active'] = 'test';
-$config['mysql']['test']['host'] = 'localhost';
+$config['mysql']['test']['host'] = 'mysqlhost';
 $config['mysql']['test']['port'] = '3306';
 $config['mysql']['test']['user'] = 'root';
 $config['mysql']['test']['password'] = '123456';
