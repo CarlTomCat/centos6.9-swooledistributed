@@ -1,11 +1,12 @@
 FROM centos:6.9
 
 # 参数
-ARG website_domain
+#ARG website_domain
 ARG nginx_port
+ARG wwwroot_path
 
 # 修改 host
-RUN echo "127.0.0.1 ${website_domain}" >> /etc/hosts
+#RUN echo "127.0.0.1 ${website_domain}" >> /etc/hosts
 
 # 安装 wget, sudo, autoconf, gcc, make
 RUN yum install -y wget \
@@ -17,7 +18,9 @@ RUN yum install -y wget \
     opensp \
     docbook-style-xsl \
     initscripts \
-    re2c
+    re2c \
+    libpng \
+    graphviz
 
 # package
 COPY lnmp1.4.tar.gz /usr/local/src/lnmp1.4.tar.gz
@@ -28,6 +31,8 @@ COPY inotify-2.0.0.tgz /usr/local/src/inotify-2.0.0.tgz
 COPY jemalloc-4.5.0.tar.gz /usr/local/src/jemalloc-4.5.0.tar.gz
 COPY swoole-src-1.9.13.tar.gz /usr/local/src/swoole-src-1.9.13.tar.gz
 COPY re2c-0.16.tar.gz /usr/local/src/re2c-0.16.tar.gz
+COPY xhprof-1.0.tar.gz /usr/local/src/xhprof-1.0.tar.gz
+COPY XDEBUG_2_5_4.tar.gz /usr/local/src/XDEBUG_2_5_4.tar.gz
 
 # 为 centos7 增加yum的epel源（redis）
 RUN cd /usr/local/src && rpm -ivh epel-release-latest-6.noarch.rpm
@@ -36,11 +41,12 @@ RUN cd /usr/local/src && rpm -ivh epel-release-latest-6.noarch.rpm
 RUN cd /usr/local/src && tar zxf lnmp1.4.tar.gz && cd lnmp1.4 && ./install_lnmp.sh
 
 # 配置 nginx
+COPY xhprof.conf /usr/local/nginx/conf/vhost/xhprof.conf
 COPY pma.conf /usr/local/nginx/conf/vhost/pma.conf
 RUN sed -i "s/include vhost\/\*\.conf;/\# log format\nlog_format access '\$remote_addr - \$remote_user \[\$time_local\] "\$request" '\n    '\$status \$body_bytes_sent "\$http_referer" '\n    '"\$http_user_agent" \$http_x_forwarded_for';\ninclude vhost\/\*\.conf;/" /usr/local/nginx/conf/nginx.conf \
     && sed -i "s/listen 80 default_server;/listen ${nginx_port} default_server;/" /usr/local/nginx/conf/nginx.conf \
-    && sed -i "s/listen 80;/listen ${nginx_port};/" /usr/local/nginx/conf/vhost/pma.conf \
-    && sed -i "s/pma\.com/${website_domain}/" /usr/local/nginx/conf/vhost/pma.conf
+    && sed -i "s/listen 80;/listen ${nginx_port};/" /usr/local/nginx/conf/vhost/pma.conf
+#    && sed -i "s/pma\.com/${website_domain}/" /usr/local/nginx/conf/vhost/pma.conf
 
 # 安装 redis
 RUN yum install -y redis
@@ -51,7 +57,7 @@ RUN cd /usr/local/src && unzip phpredis-php7.zip && cd phpredis-php7 && phpize \
     && make \
     && make install
 
-# 安装 hiredis
+# 安装 hiredis 扩展
 RUN cd /usr/local/src && tar -zxvf hiredis-0.13.3.tar.gz && cd hiredis-0.13.3 \
     && make -j \
     && sudo make install \
@@ -66,7 +72,7 @@ RUN cd /usr/local/src && tar -zxvf inotify-2.0.0.tgz && cd inotify-2.0.0 && phpi
     && make \
     && make install
 
-# 安装 jemalloc
+# 安装 jemalloc 扩展
 RUN cd /usr/local/src && tar -zxvf jemalloc-4.5.0.tar.gz && cd jemalloc-4.5.0 \
     && ./autogen.sh \
     && ./configure --with-jemalloc-prefix=je_ \
@@ -78,8 +84,32 @@ RUN cd /usr/local/src && tar -zxvf swoole-src-1.9.13.tar.gz && cd swoole-src-1.9
     && make \
     && make install
 
+# 安装 xhprof 扩展
+RUN cd /usr/local/src && tar -zxvf xhprof-1.0.tar.gz && cd xhprof-1.0/extension && phpize \
+    && ./configure --with-php-config=/usr/local/php/bin/php-config \
+    && make \
+    && make install
+
+# 安装 xdebug 扩展
+RUN cd /usr/local/src && tar -zxvf XDEBUG_2_5_4.tar.gz && cd xdebug-XDEBUG_2_5_4 && phpize \
+    && ./configure --with-php-config=/usr/local/php/bin/php-config \
+    && make \
+    && make install
+
 # 配置 php.ini
-RUN echo "extension=redis.so" >> /usr/local/php/etc/php.ini \
+RUN echo "[xhprof]" >> /usr/local/php/etc/php.ini \
+    && echo "extension=xhprof.so" >> /usr/local/php/etc/php.ini \
+    && echo "xhprof.output_dir=${wwwroot_path}/xhprof/output" >> /usr/local/php/etc/php.ini \
+    && echo "zend_extension=xdebug.so" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.remote_enable = 1" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.remote_connect_back=1" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.remote_port = 9090" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.scream = 0" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.show_local_vars = 1" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.idekey = PHPSTORM" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.remote_log=${wwwroot_path}/log/php/xdebug.log" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.remote_autostart = 1" >> /usr/local/php/etc/php.ini \
+    && echo "extension=redis.so" >> /usr/local/php/etc/php.ini \
     && echo "extension=inotify.so" >> /usr/local/php/etc/php.ini \
     && echo "extension=swoole.so" >> /usr/local/php/etc/php.ini \
     && sed -i "s/;error_log = php_errors\.log/error_log = \/data\/phplogs\/error.log/" /usr/local/php/etc/php.ini
@@ -99,9 +129,8 @@ CMD /etc/init.d/php-fpm start \
     && /etc/init.d/nginx start \
     && /etc/init.d/redis start \
     && /usr/sbin/sshd \
-    && cd /data/wwwroot \
+    && cd /data/wwwroot/trunk \
     && composer install \
-    && cd /data/wwwroot/bin \
-    && php start_swoole_server.php stop \
+    && cd /data/wwwroot/trunk/bin \
     && php start_swoole_server.php start
 

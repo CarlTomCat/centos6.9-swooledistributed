@@ -8,10 +8,13 @@ services:
         - local_host_ip=${LOCAL_HOST_IP}
         - website_domain=${WEBSITE_DOMAIN}
         - nginx_port=${NGINX_PORT}
+        - wwwroot_path=/data/wwwroot
     environment:
       - LOCAL_HOST_IP=${LOCAL_HOST_IP}
       - MYSQL_ROOT_PASSWORD=123456
     extra_hosts:
+      - "pma.com:${LOCAL_HOST_IP}"
+      - "xhprof.com:${LOCAL_HOST_IP}"
       - "${WEBSITE_DOMAIN}:${LOCAL_HOST_IP}"
     ports:
       - "${NGINX_PORT}:${NGINX_PORT}"

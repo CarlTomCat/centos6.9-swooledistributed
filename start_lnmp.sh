@@ -33,7 +33,8 @@ TRUE=1
 FALSE=0
 
 # 创建初始化目录
-mkdir ${ROOT_PATH} ${ROOT_PATH}/mysql ${ROOT_PATH}/mysql/data ${ROOT_PATH}/log ${ROOT_PATH}/log/nginx ${ROOT_PATH}/log/php
+mkdir -p ${ROOT_PATH}/mysql/data ${ROOT_PATH}/log/nginx ${ROOT_PATH}/log/php
+touch ${ROOT_PATH}/log/php/xdebug.log
 chmod -R 755 ${ROOT_PATH}
 
 # 获取待启动指定环境标识
