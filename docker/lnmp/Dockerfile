@@ -101,18 +101,19 @@ RUN echo "[xhprof]" >> /usr/local/php/etc/php.ini \
     && echo "extension=xhprof.so" >> /usr/local/php/etc/php.ini \
     && echo "xhprof.output_dir=${wwwroot_path}/xhprof/output" >> /usr/local/php/etc/php.ini \
     && echo "zend_extension=xdebug.so" >> /usr/local/php/etc/php.ini \
-    && echo "xdebug.remote_enable = 1" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.remote_enable=1" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.remote_connect_back=1" >> /usr/local/php/etc/php.ini \
-    && echo "xdebug.remote_port = 9090" >> /usr/local/php/etc/php.ini \
-    && echo "xdebug.scream = 0" >> /usr/local/php/etc/php.ini \
-    && echo "xdebug.show_local_vars = 1" >> /usr/local/php/etc/php.ini \
-    && echo "xdebug.idekey = PHPSTORM" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.remote_port=9090" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.scream=0" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.show_local_vars=1" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.idekey=PHPSTORM" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.remote_log=${wwwroot_path}/log/php/xdebug.log" >> /usr/local/php/etc/php.ini \
-    && echo "xdebug.remote_autostart = 1" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.remote_autostart=1" >> /usr/local/php/etc/php.ini \
     && echo "extension=redis.so" >> /usr/local/php/etc/php.ini \
     && echo "extension=inotify.so" >> /usr/local/php/etc/php.ini \
     && echo "extension=swoole.so" >> /usr/local/php/etc/php.ini \
-    && sed -i "s/;error_log = php_errors\.log/error_log = \/data\/phplogs\/error.log/" /usr/local/php/etc/php.ini
+    && sed -i "s/;error_log = php_errors\.log/error_log = \/data\/phplogs\/error.log/" /usr/local/php/etc/php.ini \
+    && sed -i "s/disable_functions = passthru,/disable_functions = /" /usr/local/php/etc/php.ini
 
 # 安装 ssh 服务
 RUN yum install -y openssh-server passwd \
@@ -121,7 +122,8 @@ RUN yum install -y openssh-server passwd \
     && ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
 
 # 安装 composer
-RUN cd /usr/local/src && curl -sS https://getcomposer.org/installer | php \
+COPY composer.phar /usr/local/bin/composer
+RUN chmod 755 /usr/local/bin/composer \
     && composer config -g repo.packagist composer https://packagist.phpcomposer.com
 
 # 启动 web 环境
@@ -132,5 +134,6 @@ CMD /etc/init.d/php-fpm start \
     && cd /data/wwwroot/trunk \
     && composer install \
     && cd /data/wwwroot/trunk/bin \
+    && php start_swoole_server.php stop \
     && php start_swoole_server.php start
 
