@@ -5,9 +5,6 @@ FROM centos:6.9
 ARG nginx_port
 ARG wwwroot_path
 
-# 修改 host
-#RUN echo "127.0.0.1 ${website_domain}" >> /etc/hosts
-
 # 安装 wget, sudo, autoconf, gcc, make
 RUN yum install -y wget \
     sudo \
@@ -42,11 +39,8 @@ RUN cd /usr/local/src && tar zxf lnmp1.4.tar.gz && cd lnmp1.4 && ./install_lnmp.
 
 # 配置 nginx
 COPY xhprof.conf /usr/local/nginx/conf/vhost/xhprof.conf
-COPY pma.conf /usr/local/nginx/conf/vhost/pma.conf
 RUN sed -i "s/include vhost\/\*\.conf;/\# log format\nlog_format access '\$remote_addr - \$remote_user \[\$time_local\] "\$request" '\n    '\$status \$body_bytes_sent "\$http_referer" '\n    '"\$http_user_agent" \$http_x_forwarded_for';\ninclude vhost\/\*\.conf;/" /usr/local/nginx/conf/nginx.conf \
-    && sed -i "s/listen 80 default_server;/listen ${nginx_port} default_server;/" /usr/local/nginx/conf/nginx.conf \
-    && sed -i "s/listen 80;/listen ${nginx_port};/" /usr/local/nginx/conf/vhost/pma.conf
-#    && sed -i "s/pma\.com/${website_domain}/" /usr/local/nginx/conf/vhost/pma.conf
+    && sed -i "s/listen 80 default_server;/listen ${nginx_port} default_server;/" /usr/local/nginx/conf/nginx.conf
 
 # 安装 redis
 RUN yum install -y redis
@@ -113,7 +107,8 @@ RUN echo "[xhprof]" >> /usr/local/php/etc/php.ini \
     && echo "extension=inotify.so" >> /usr/local/php/etc/php.ini \
     && echo "extension=swoole.so" >> /usr/local/php/etc/php.ini \
     && sed -i "s/;error_log = php_errors\.log/error_log = \/data\/phplogs\/error.log/" /usr/local/php/etc/php.ini \
-    && sed -i "s/disable_functions = passthru,/disable_functions = /" /usr/local/php/etc/php.ini
+    && sed -i "s/disable_functions = passthru,/disable_functions = /" /usr/local/php/etc/php.ini \
+    && sed -i "s/proc_open,//" /usr/local/php/etc/php.ini
 
 # 安装 ssh 服务
 RUN yum install -y openssh-server passwd \
