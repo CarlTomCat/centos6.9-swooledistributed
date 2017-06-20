@@ -110,7 +110,8 @@ RUN echo "[xhprof]" >> /usr/local/php/etc/php.ini \
     && echo "extension=swoole.so" >> /usr/local/php/etc/php.ini \
     && sed -i "s/;error_log = php_errors\.log/error_log = \/data\/phplogs\/error.log/" /usr/local/php/etc/php.ini \
     && sed -i "s/disable_functions = passthru,/disable_functions = /" /usr/local/php/etc/php.ini \
-    && sed -i "s/proc_open,//" /usr/local/php/etc/php.ini
+    && sed -i "s/proc_open,//" /usr/local/php/etc/php.ini \
+    && sed -i "s/proc_get_status,//" /usr/local/php/etc/php.ini
 
 # 安装 ssh 服务
 RUN yum install -y openssh-server passwd \
@@ -124,13 +125,5 @@ RUN chmod 755 /usr/local/bin/composer \
     && composer config -g repo.packagist composer https://packagist.phpcomposer.com
 
 # 启动 web 环境
-CMD /etc/init.d/php-fpm start \
-    && /etc/init.d/nginx start \
-    && /etc/init.d/redis start \
-    && /usr/sbin/sshd \
-    && cd /data/wwwroot/trunk \
-    && composer install \
-    && cd /data/wwwroot/trunk/bin \
-    && php start_swoole_server.php stop \
-    && php start_swoole_server.php start
+CMD /data/wwwroot/trunk/start.sh
 
