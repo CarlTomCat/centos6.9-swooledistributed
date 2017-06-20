@@ -4,6 +4,7 @@ FROM centos:6.9
 #ARG website_domain
 ARG nginx_port
 ARG wwwroot_path
+ARG mysql_host
 
 # 安装 wget, sudo, autoconf, gcc, make
 RUN yum install -y wget \
@@ -35,7 +36,8 @@ COPY XDEBUG_2_5_4.tar.gz /usr/local/src/XDEBUG_2_5_4.tar.gz
 RUN cd /usr/local/src && rpm -ivh epel-release-latest-6.noarch.rpm
 
 # 下载lnmp安装包并安装, PHP>7.0; mysql>5.6
-RUN cd /usr/local/src && tar zxf lnmp1.4.tar.gz && cd lnmp1.4 && ./install_lnmp.sh
+RUN cd /usr/local/src && tar zxf lnmp1.4.tar.gz && cd lnmp1.4 && ./install_lnmp.sh \
+    && sed -i "s/localhost/${mysql_host}/" /home/wwwroot/default/phpmyadmin/config.inc.php
 
 # 配置 nginx
 COPY xhprof.conf /usr/local/nginx/conf/vhost/xhprof.conf

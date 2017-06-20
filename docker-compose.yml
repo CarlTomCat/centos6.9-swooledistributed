@@ -9,6 +9,7 @@ services:
         - website_domain=${WEBSITE_DOMAIN}
         - nginx_port=${NGINX_PORT}
         - wwwroot_path=/data/wwwroot
+        - mysql_host=mysqlhost
     environment:
       - LOCAL_HOST_IP=${LOCAL_HOST_IP}
       - MYSQL_ROOT_PASSWORD=123456
