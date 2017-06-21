@@ -7,5 +7,9 @@
 cd /data/wwwroot/trunk
 composer install
 cd /data/wwwroot/trunk/bin
-php start_swoole_server.php stop
-php start_swoole_server.php start
+ps -fe|grep \[s]tart_swoole_server
+if [[ $? -ne 0 ]]; then
+    php start_swoole_server.php start
+else
+    echo "start_swoole_server is running..."
+fi

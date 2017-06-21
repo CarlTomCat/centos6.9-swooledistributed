@@ -24,7 +24,7 @@ $config['websocket']['opcode'] = WEBSOCKET_OPCODE_BINARY;
  */
 $config['tcp']['enable'] = true;
 $config['tcp']['socket'] = '0.0.0.0';
-$config['tcp']['port'] = 9090;
+$config['tcp']['port'] = 9009;
 
 /**
  * 服务器设置

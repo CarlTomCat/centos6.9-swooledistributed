@@ -13,7 +13,7 @@ fi
 
 export NGINX_PORT="8080"
 export SWOOLE_HTTP_PORT="80"
-export SWOOLE_TCP_PORT="9090"
+export SWOOLE_TCP_PORT="9009"
 export WEBSITE_DOMAIN="www.dev.com";
 export ROOT_PATH=$1;
 echo "工作目录：${ROOT_PATH}"
@@ -37,8 +37,18 @@ mkdir -p ${ROOT_PATH}/mysql/data ${ROOT_PATH}/log/nginx ${ROOT_PATH}/log/php
 touch ${ROOT_PATH}/log/php/xdebug.log
 
 # 获取待启动指定环境标识
-BUILD=$2
+if [[ $2 == '' ]]; then
+    ARG="up"
+else
+    ARG=$2
+fi
+
+if [[ $3 == '' ]]; then
+    IMAGE=""
+else
+    IMAGE=$3
+fi
 
 # 启动 docker 环境
 docker-compose -f docker-compose.yml stop
-docker-compose -f docker-compose.yml up ${BUILD}
+docker-compose -f docker-compose.yml ${ARG} ${IMAGE}
