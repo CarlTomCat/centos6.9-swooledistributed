@@ -1,7 +1,7 @@
 FROM centos:6.9
 
 # 参数
-#ARG website_domain
+ARG website_domain
 ARG nginx_port
 ARG wwwroot_path
 ARG mysql_host
@@ -111,18 +111,18 @@ RUN echo "[xhprof]" >> /usr/local/php/etc/php.ini \
     && echo "zend_extension=xdebug.so" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.remote_enable=1" >> /usr/local/php/etc/php.ini \
 #    && echo "xdebug.remote_connect_back=1" >> /usr/local/php/etc/php.ini \
-    && echo "xdebug.remote_host=${local_host_ip}" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.remote_host=${website_domain}" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.remote_port=9090" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.remote_handler=dbgp" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.remote_log=${wwwroot_path}/log/php/xdebug.log" >> /usr/local/php/etc/php.ini \
 #    && echo "xdebug.remote_autostart=1" >> /usr/local/php/etc/php.ini \
-#    && echo "xdebug.remote_mode=req" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.remote_mode=req" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.scream=0" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.show_local_vars=1" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.idekey=PHPSTORM" >> /usr/local/php/etc/php.ini \
-    && echo "xdebug.collect_vars=On" >> /usr/local/php/etc/php.ini \
-    && echo "xdebug.collect_return=On" >> /usr/local/php/etc/php.ini \
-    && echo "xdebug.collect_params=On" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.collect_vars=1" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.collect_return=1" >> /usr/local/php/etc/php.ini \
+    && echo "xdebug.collect_params=1" >> /usr/local/php/etc/php.ini \
     && echo "extension=redis.so" >> /usr/local/php/etc/php.ini \
     && echo "extension=inotify.so" >> /usr/local/php/etc/php.ini \
     && echo "extension=swoole.so" >> /usr/local/php/etc/php.ini \
