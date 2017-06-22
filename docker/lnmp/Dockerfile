@@ -28,7 +28,7 @@ COPY epel-release-latest-6.noarch.rpm /usr/local/src/epel-release-latest-6.noarc
 COPY hiredis-0.13.3.tar.gz /usr/local/src/hiredis-0.13.3.tar.gz
 COPY inotify-2.0.0.tgz /usr/local/src/inotify-2.0.0.tgz
 COPY jemalloc-4.5.0.tar.gz /usr/local/src/jemalloc-4.5.0.tar.gz
-COPY swoole-src-1.9.13.tar.gz /usr/local/src/swoole-src-1.9.13.tar.gz
+COPY swoole-src-1.9.14.tar.gz /usr/local/src/swoole-src-1.9.14.tar.gz
 COPY re2c-0.16.tar.gz /usr/local/src/re2c-0.16.tar.gz
 COPY xhprof-1.0.tar.gz /usr/local/src/xhprof-1.0.tar.gz
 COPY XDEBUG_2_5_4.tar.gz /usr/local/src/XDEBUG_2_5_4.tar.gz
@@ -66,12 +66,6 @@ RUN cd /usr/local/src && tar -zxvf jemalloc-4.5.0.tar.gz && cd jemalloc-4.5.0 \
     && ./configure --with-jemalloc-prefix=je_ \
     && make -j 4
 
-# 安装 swoole 扩展
-RUN cd /usr/local/src && tar -zxvf swoole-src-1.9.13.tar.gz && cd swoole-src-1.9.13 && phpize \
-    && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis --with-jemalloc-dir=/usr/local/src/jemalloc-4.5.0 \
-    && make \
-    && make install
-
 # 安装 xhprof 扩展
 RUN cd /usr/local/src && tar -zxvf xhprof-1.0.tar.gz && cd xhprof-1.0/extension && phpize \
     && ./configure --with-php-config=/usr/local/php/bin/php-config \
@@ -95,6 +89,12 @@ COPY composer.phar /usr/local/bin/composer
 RUN chmod 755 /usr/local/bin/composer \
     && composer config -g repo.packagist composer https://packagist.phpcomposer.com
 
+# 安装 swoole 扩展
+RUN cd /usr/local/src && tar -zxvf swoole-src-1.9.14.tar.gz && cd swoole-src-1.9.14 && phpize \
+    && ./configure --with-php-config=/usr/local/php/bin/php-config --enable-async-redis --with-jemalloc-dir=/usr/local/src/jemalloc-4.5.0 \
+    && make \
+    && make install
+
 # 配置 nginx
 RUN sed -i "s/localhost/${mysql_host}/" /home/wwwroot/default/phpmyadmin/config.inc.php
 COPY xhprof.conf /usr/local/nginx/conf/vhost/xhprof.conf
@@ -116,6 +116,7 @@ RUN echo "[xhprof]" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.remote_handler=dbgp" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.remote_log=${wwwroot_path}/log/php/xdebug.log" >> /usr/local/php/etc/php.ini \
 #    && echo "xdebug.remote_autostart=1" >> /usr/local/php/etc/php.ini \
+#    && echo "xdebug.remote_mode=req" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.scream=0" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.show_local_vars=1" >> /usr/local/php/etc/php.ini \
     && echo "xdebug.idekey=PHPSTORM" >> /usr/local/php/etc/php.ini \
